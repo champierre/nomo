@@ -6,11 +6,31 @@ let hasAnimated = false;
 let currentPhase = 0; // 0: フォークボール, 1: 接近アニメーション
 let randomNumber = 0;
 let ballImage;
+let video;
+let isVideoPlaying = false;
+let isFirstPlay = true;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     // ボールの画像を読み込む
     ballImage = loadImage('ball.png');
+    
+    // 動画を読み込む
+    video = createVideo('nomo.mp4', () => {
+        video.size(windowWidth, windowHeight);
+        video.style('position', 'absolute');
+        video.style('top', '0');
+        video.style('left', '0');
+        video.style('z-index', '1');
+        // 動画の終了イベントを設定
+        video.elt.addEventListener('ended', () => {
+            console.log('動画終了');
+            isVideoPlaying = false;
+            video.style('display', 'none');
+            video.hide();
+            startAnimation();
+        });
+    });
     
     ball = {
         x: windowWidth * 0.3,
@@ -21,20 +41,38 @@ function setup() {
     };
     
     // スタートボタンのイベントリスナーを設定
-    document.getElementById('startButton').addEventListener('click', startAnimation);
+    document.getElementById('startButton').addEventListener('click', handleStart);
+}
+
+function handleStart() {
+    if (!hasAnimated) {
+        if (isFirstPlay) {
+            // 初回のみ動画を再生
+            isFirstPlay = false;
+            startVideo();
+        } else {
+            // 2回目以降は直接アニメーションを開始
+            startAnimation();
+        }
+    }
+}
+
+function startVideo() {
+    isVideoPlaying = true;
+    // 動画を再生
+    video.play();
+    console.log('動画再生開始');
 }
 
 function startAnimation() {
-    if (!hasAnimated) {
-        isAnimating = true;
-        animationProgress = 0;
-        ball.visible = true;
-        currentPhase = 0;
-        // 1から30までのランダムな数字を生成
-        randomNumber = Math.floor(Math.random() * 30) + 1;
-        // スタートボタンを非表示
-        document.getElementById('startButton').style.display = 'none';
-    }
+    isAnimating = true;
+    animationProgress = 0;
+    ball.visible = true;
+    currentPhase = 0;
+    // 1から30までのランダムな数字を生成
+    randomNumber = Math.floor(Math.random() * 30) + 1;
+    // スタートボタンを非表示
+    document.getElementById('startButton').style.display = 'none';
 }
 
 function showStartButton() {
@@ -45,7 +83,8 @@ function showStartButton() {
 function draw() {
     background(0);
     
-    if (isAnimating) {
+    // 動画が再生中でない場合のみアニメーションを描画
+    if (!isVideoPlaying && isAnimating) {
         // アニメーションの進行度を更新
         animationProgress++;
         
@@ -108,7 +147,7 @@ function draw() {
     }
     
     // ボールを描画（visibleがtrueの場合のみ）
-    if (ball.visible) {
+    if (!isVideoPlaying && ball.visible) {
         push();
         translate(ball.x + windowWidth/2, ball.y + windowHeight/2);
         rotate(radians(ball.rotation));
@@ -129,6 +168,8 @@ function draw() {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
+    // 動画のサイズも更新
+    video.size(windowWidth, windowHeight);
     // ウィンドウサイズが変更された時にボールの開始位置を更新
     if (!isAnimating) {
         ball.x = windowWidth * 0.3;
