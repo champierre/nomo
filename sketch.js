@@ -1,6 +1,7 @@
 let ball;
 let animationProgress = 0;
 const animationDuration = 120; // 2秒間（60fps × 2）
+const approachDuration = 240; // 4秒間（60fps × 4）
 let isAnimating = false;
 let hasAnimated = false;
 let currentPhase = 0; // 0: フォークボール, 1: 接近アニメーション
@@ -123,7 +124,7 @@ function draw() {
             }
         } else {
             // 接近アニメーションフェーズ
-            if (animationProgress >= animationDuration) {
+            if (animationProgress >= approachDuration) {
                 isAnimating = false;
                 hasAnimated = true;
                 
@@ -132,7 +133,7 @@ function draw() {
                 return;
             }
             
-            const progress = animationProgress / animationDuration;
+            const progress = animationProgress / approachDuration;
             
             // 最後の0.1秒間は完全に停止
             if (progress > 0.9) {
