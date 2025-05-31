@@ -3,7 +3,8 @@ let animationProgress = 0;
 const animationDuration = 120; // 2秒間（60fps × 2）
 let isAnimating = false;
 let hasAnimated = false;
-let buttonTimer = null;
+let currentPhase = 0; // 0: フォークボール, 1: 接近アニメーション
+let randomNumber = 0;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -24,6 +25,9 @@ function startAnimation() {
         isAnimating = true;
         animationProgress = 0;
         ball.visible = true;
+        currentPhase = 0;
+        // 1から30までのランダムな数字を生成
+        randomNumber = Math.floor(Math.random() * 30) + 1;
         // スタートボタンを非表示
         document.getElementById('startButton').style.display = 'none';
     }
@@ -41,43 +45,61 @@ function draw() {
         // アニメーションの進行度を更新
         animationProgress++;
         
-        // アニメーションが終了したら
-        if (animationProgress >= animationDuration) {
-            isAnimating = false;
-            hasAnimated = true;
-            ball.visible = false;
-            // ボールを開始位置に戻す
-            ball.x = windowWidth * 0.3;
-            ball.y = -windowHeight * 0.2;
-            ball.size = 50;
-            ball.rotation = 0;
-            
-            // 3秒後にスタートボタンを表示
-            if (buttonTimer) {
-                clearTimeout(buttonTimer);
+        if (currentPhase === 0) {
+            // フォークボールフェーズ
+            if (animationProgress >= animationDuration) {
+                // フェーズ1に移行
+                currentPhase = 1;
+                animationProgress = 0;
+                // ボールを画面奥に配置
+                ball.x = 0;
+                ball.y = 0;
+                ball.size = 20;
+                ball.rotation = 0;
+                return;
             }
-            buttonTimer = setTimeout(showStartButton, 3000);
-            return;
-        }
-        
-        const progress = animationProgress / animationDuration;
-        
-        // ボールの位置を計算
-        if (progress < 0.5) {
-            // 開始位置から中央上方まで
-            const t = progress / 0.5;
-            ball.x = lerp(windowWidth * 0.3, 0, t);
-            ball.y = lerp(-windowHeight * 0.2, -windowHeight * 0.4, t);
-            ball.rotation = lerp(0, 180, t);
-            ball.size = lerp(50, 70, t);
+            
+            const progress = animationProgress / animationDuration;
+            
+            // ボールの位置を計算
+            if (progress < 0.5) {
+                // 開始位置から中央上方まで
+                const t = progress / 0.5;
+                ball.x = lerp(windowWidth * 0.3, 0, t);
+                ball.y = lerp(-windowHeight * 0.2, -windowHeight * 0.4, t);
+                ball.rotation = lerp(0, 180, t);
+                ball.size = lerp(50, 70, t);
+            } else {
+                // 中央上方から左下へ急激に落下
+                const t = (progress - 0.5) / 0.5;
+                ball.x = lerp(0, -windowWidth * 0.5, t);
+                ball.y = lerp(-windowHeight * 0.4, windowHeight, t);
+                ball.rotation = lerp(180, 360, t);
+                // より急激なサイズ変化
+                ball.size = lerp(70, 250, t * t * t);
+            }
         } else {
-            // 中央上方から左下へ急激に落下
-            const t = (progress - 0.5) / 0.5;
-            ball.x = lerp(0, -windowWidth * 0.5, t);
-            ball.y = lerp(-windowHeight * 0.4, windowHeight, t);
-            ball.rotation = lerp(180, 360, t);
-            // より急激なサイズ変化
-            ball.size = lerp(70, 250, t * t * t);
+            // 接近アニメーションフェーズ
+            if (animationProgress >= animationDuration) {
+                isAnimating = false;
+                hasAnimated = true;
+                
+                // すぐにスタートボタンを表示
+                showStartButton();
+                return;
+            }
+            
+            const progress = animationProgress / animationDuration;
+            
+            // 最後の0.1秒間は完全に停止
+            if (progress > 0.9) {
+                ball.size = 500;
+                ball.rotation = 0;
+            } else {
+                // 画面奥から手前に向かって接近
+                ball.size = lerp(20, 500, progress * progress * progress);
+                ball.rotation = lerp(0, 3600, progress); // 10回転
+            }
         }
     }
     
@@ -89,6 +111,14 @@ function draw() {
         fill(255);
         noStroke();
         ellipse(0, 0, ball.size);
+        
+        // 数字を描画（接近アニメーションフェーズの場合のみ）
+        if (currentPhase === 1) {
+            fill(0); // 数字の色を黒に
+            textAlign(CENTER, CENTER);
+            textSize(ball.size * 0.4); // ボールのサイズに応じて文字サイズを調整
+            text(randomNumber.toString(), 0, 0);
+        }
         pop();
     }
 }
