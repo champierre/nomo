@@ -10,6 +10,7 @@ let ballImage;
 let video;
 let isVideoPlaying = false;
 let isFirstPlay = true;
+let maxRandomNumber = 24; // 乱数の最大値（デフォルト値）
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -43,6 +44,34 @@ function setup() {
     
     // スタートボタンのイベントリスナーを設定
     document.getElementById('startButton').addEventListener('click', handleStart);
+    
+    // 設定ボタンのイベントリスナーを設定
+    const settingsButton = document.getElementById('settingsButton');
+    const settingsModal = document.getElementById('settingsModal');
+    const saveSettingsButton = document.getElementById('saveSettings');
+    const maxNumberInput = document.getElementById('maxNumber');
+    
+    // 設定ボタンクリック時の処理
+    settingsButton.addEventListener('click', () => {
+        maxNumberInput.value = maxRandomNumber;
+        settingsModal.style.display = 'block';
+    });
+    
+    // 保存ボタンクリック時の処理
+    saveSettingsButton.addEventListener('click', () => {
+        const newMax = parseInt(maxNumberInput.value);
+        if (newMax > 0) {
+            maxRandomNumber = newMax;
+        }
+        settingsModal.style.display = 'none';
+    });
+    
+    // モーダル外クリック時の処理
+    window.addEventListener('click', (event) => {
+        if (event.target === settingsModal) {
+            settingsModal.style.display = 'none';
+        }
+    });
 }
 
 function handleStart() {
@@ -70,8 +99,8 @@ function startAnimation() {
     animationProgress = 0;
     ball.visible = true;
     currentPhase = 0;
-    // 1から30までのランダムな数字を生成
-    randomNumber = Math.floor(Math.random() * 30) + 1;
+    // 1からmaxRandomNumberまでのランダムな数字を生成
+    randomNumber = Math.floor(Math.random() * maxRandomNumber) + 1;
     // スタートボタンを非表示
     document.getElementById('startButton').style.display = 'none';
 }
