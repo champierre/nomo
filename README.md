@@ -21,13 +21,13 @@
 - HTML5
 - CSS3
 - JavaScript
-- p5.js (アニメーション用ライブラリ)
+- p5.js（アニメーション用ライブラリ）
 
 ## ファイル構成
 
 - `index.html` - メインのHTMLファイル
 - `sketch.js` - アニメーションとロジックを制御するJavaScriptファイル
-- `ball.png` - ボールの画像ファイル
+- `ball.png` - ボールの画像ファイル（[いらすとや](https://www.irasutoya.com/2016/04/blog-post_661.html)の素材を使用）
 
 ## 開発環境のセットアップ
 
@@ -37,4 +37,8 @@
 
 ## ライセンス
 
-MITライセンス 
+MITライセンス
+
+## 素材の出典
+
+- ボールの画像：[いらすとや](https://www.irasutoya.com/2016/04/blog-post_661.html)の素材を使用しています。 
